@@ -1,0 +1,7 @@
+zh_CN:
+  theme_metadata:
+    settings:
+      text_marquee_enabled: "启用文字跑马灯组件"
+      marquee_text: "跑马灯显示的文字"
+      marquee_url: "点击跑马灯时跳转的链接"
+      marquee_animation_duration: "动画持续时间（秒）" 

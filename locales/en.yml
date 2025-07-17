@@ -1,0 +1,7 @@
+en:
+  theme_metadata:
+    settings:
+      text_marquee_enabled: "Enable the text marquee component"
+      marquee_text: "Text to display in the marquee"
+      marquee_url: "URL to redirect when clicking the marquee"
+      marquee_animation_duration: "Animation duration in seconds" 

@@ -1,0 +1,29 @@
+text_marquee_enabled:
+  type: bool
+  default: true
+  description:
+    en: "Enable the text marquee component"
+    zh_CN: "启用文字跑马灯组件"
+
+marquee_text:
+  type: string
+  default: "最新推薦"
+  description:
+    en: "Text to display in the marquee"
+    zh_CN: "跑马灯显示的文字"
+
+marquee_url:
+  type: string
+  default: "https://fungps01.com/lists/recommendation"
+  description:
+    en: "URL to redirect when clicking the marquee"
+    zh_CN: "点击跑马灯时跳转的链接"
+
+marquee_animation_duration:
+  type: integer
+  default: 8
+  min: 3
+  max: 20
+  description:
+    en: "Animation duration in seconds"
+    zh_CN: "动画持续时间（秒）" 
