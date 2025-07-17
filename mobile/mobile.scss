@@ -1,45 +1,43 @@
-// 移动端跑马灯特殊样式
 .text-marquee-container {
-  // 移动端触摸优化
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   
-  // 移动端尺寸调整
-  max-width: 90vw;
-  height: 42px;
+  max-width: 160px;
+  height: 36px;
   margin: 15px auto;
+  padding: 0 15px;
   
   .marquee-text {
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.5px;
   }
   
-  // 移动端悬停效果调整
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.95);
   }
 }
 
-// 小屏幕设备优化
 @media (max-width: 375px) {
   .text-marquee-container {
-    max-width: 85vw;
-    height: 38px;
+    max-width: 140px;
+    height: 32px;
+    padding: 0 12px;
     
     .marquee-text {
-      font-size: 13px;
+      font-size: 12px;
     }
   }
 }
 
-// 横屏模式优化
 @media (orientation: landscape) and (max-height: 500px) {
   .text-marquee-container {
-    margin: 10px auto;
-    height: 36px;
+    margin: 8px auto;
+    height: 30px;
+    max-width: 140px;
+    padding: 0 12px;
     
     .marquee-text {
-      font-size: 14px;
+      font-size: 12px;
     }
   }
 } 

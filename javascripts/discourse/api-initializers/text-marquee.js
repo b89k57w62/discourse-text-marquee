@@ -5,13 +5,11 @@ export default {
   
   initialize() {
     withPluginApi("0.8.31", (api) => {
-      // 获取主题设置的正确方式
       const themeSettings = api.container.lookup("service:theme-settings");
       
       console.log("Text Marquee: Initializing...");
       console.log("Text Marquee: Settings enabled:", themeSettings?.text_marquee_enabled);
       
-      // 如果设置为 false 则不显示
       if (themeSettings?.text_marquee_enabled === false) {
         console.log("Text Marquee: Component disabled in settings");
         return;
@@ -20,10 +18,7 @@ export default {
       function createMarqueeComponent() {
         const container = document.createElement('div');
         container.className = 'text-marquee-container';
-        container.setAttribute('role', 'button');
-        container.setAttribute('tabindex', '0');
         
-        // 获取设置值
         const marqueeText = themeSettings?.marquee_text || '最新推薦';
         const marqueeUrl = themeSettings?.marquee_url || 'https://fungps01.com/lists/recommendation';
         const duration = themeSettings?.marquee_animation_duration || 8;
@@ -44,7 +39,7 @@ export default {
         function handleClick(event) {
           event.preventDefault();
           console.log("Text Marquee: Clicked, redirecting to:", marqueeUrl);
-          window.open(marqueeUrl, '_blank', 'noopener,noreferrer');
+          window.location.href = marqueeUrl;
         }
         
         function handleKeyPress(event) {
@@ -69,13 +64,11 @@ export default {
           return;
         }
 
-        // 检查是否已存在
         if (document.querySelector('.text-marquee-container')) {
           console.log("Text Marquee: Component already exists, skipping");
           return;
         }
 
-        // 尝试多个可能的插入位置
         const targetSelectors = [
           '#main-outlet',
           '.container.posts', 
@@ -97,7 +90,6 @@ export default {
         if (targetElement) {
           const marqueeComponent = createMarqueeComponent();
           
-          // 在目标元素顶部插入
           if (targetElement.firstChild) {
             targetElement.insertBefore(marqueeComponent, targetElement.firstChild);
           } else {
@@ -122,7 +114,6 @@ export default {
       
       insertMarquee();
       
-      // 监听主题设置变化（如果可用）
       if (api.onThemeSettingsChange) {
         api.onThemeSettingsChange(() => {
           console.log("Text Marquee: Theme settings changed, reloading component");
