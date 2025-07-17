@@ -70,9 +70,9 @@ export default {
         }
 
         const targetSelectors = [
-          '.navigation-container',
-          '.list-controls',
-          '#list-area',
+          '.welcome-message',
+          '.topic-list-header',
+          '.ember-view .container',
           '#main-outlet',
           '.container.posts',
           '#main',
@@ -92,13 +92,18 @@ export default {
         if (targetElement) {
           const marqueeComponent = createMarqueeComponent();
           
-          if (targetElement.firstChild) {
-            targetElement.insertBefore(marqueeComponent, targetElement.firstChild);
+          const welcomeText = document.querySelector('p');
+          if (welcomeText && welcomeText.textContent.includes('很高兴在这里见到您')) {
+            welcomeText.parentNode.insertBefore(marqueeComponent, welcomeText.nextSibling);
+            console.log("Text Marquee: Component inserted after welcome text");
           } else {
-            targetElement.appendChild(marqueeComponent);
+            if (targetElement.firstChild) {
+              targetElement.insertBefore(marqueeComponent, targetElement.firstChild);
+            } else {
+              targetElement.appendChild(marqueeComponent);
+            }
+            console.log("Text Marquee: Component inserted into fallback position:", targetElement.tagName);
           }
-          
-          console.log("Text Marquee: Component inserted successfully into:", targetElement.tagName);
         } else {
           console.error("Text Marquee: No suitable target element found");
           console.log("Text Marquee: Available elements:", document.querySelectorAll('*').length);
