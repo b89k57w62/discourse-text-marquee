@@ -1,5 +1,6 @@
 {
   "name": "Text Marquee Component",
+  "component": true,
   "about_url": "https://github.com/your-username/discourse-text-marquee",
   "license_url": "https://github.com/your-username/discourse-text-marquee/blob/main/LICENSE",
   "authors": "Jeffrey",
