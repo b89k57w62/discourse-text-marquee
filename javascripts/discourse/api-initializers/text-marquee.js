@@ -70,11 +70,13 @@ export default {
         }
 
         const targetSelectors = [
+          '.navigation-container',
+          '.list-controls',
+          '#list-area',
           '#main-outlet',
-          '.container.posts', 
+          '.container.posts',
           '#main',
           '.wrap',
-          '.d-header',
           'body'
         ];
         

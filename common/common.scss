@@ -1,8 +1,9 @@
 .text-marquee-container {
-  width: auto;
-  max-width: 200px;
+  width: 100%;
+  max-width: 300px;
   height: 40px;
-  background: transparent;
+  background: rgba(0, 136, 204, 0.1);
+  border: 1px solid rgba(0, 136, 204, 0.2);
   border-radius: 20px;
   margin: 20px auto;
   position: relative;
@@ -10,15 +11,16 @@
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 20px;
+  overflow: hidden;
   
   &:hover {
-    transform: scale(1.05);
+    background: rgba(0, 136, 204, 0.15);
+    border-color: rgba(0, 136, 204, 0.3);
+    transform: scale(1.02);
   }
   
   &:focus {
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--primary, #0088cc);
     outline-offset: 2px;
   }
 }
@@ -28,40 +30,43 @@
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .marquee-text {
-  color: #FFD700;
+  color: #0088cc;
   font-size: 16px;
   font-weight: bold;
   letter-spacing: 1px;
   white-space: nowrap;
-  text-align: center;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
-  animation: blink var(--marquee-duration, 2s) ease-in-out infinite;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  animation: marqueeScroll var(--marquee-duration, 8s) linear infinite;
 }
 
-@keyframes blink {
-  0%, 50% {
-    opacity: 1;
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(100%) translateY(-50%);
   }
-  51%, 100% {
-    opacity: 0.3;
+  100% {
+    transform: translateX(-100%) translateY(-50%);
   }
 }
 
 .text-marquee-container:hover .marquee-text {
   animation-play-state: paused;
-  opacity: 1;
+  color: #005588;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 768px) {
   .text-marquee-container {
-    max-width: 180px;
+    max-width: 250px;
     height: 36px;
     margin: 15px auto;
-    padding: 0 15px;
     
     .marquee-text {
       font-size: 14px;
@@ -71,10 +76,9 @@
 
 @media (max-width: 480px) {
   .text-marquee-container {
-    max-width: 150px;
+    max-width: 200px;
     height: 32px;
     margin: 10px auto;
-    padding: 0 12px;
     
     .marquee-text {
       font-size: 12px;
