@@ -2,9 +2,9 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   
-  max-width: 250px;
-  height: 36px;
-  margin: 15px auto;
+  max-width: 100px;
+  height: 32px;
+  margin: 12px auto;
   
   .marquee-text {
     font-size: 14px;
@@ -18,8 +18,8 @@
 
 @media (max-width: 375px) {
   .text-marquee-container {
-    max-width: 200px;
-    height: 32px;
+    max-width: 85px;
+    height: 28px;
     
     .marquee-text {
       font-size: 12px;
@@ -30,11 +30,11 @@
 @media (orientation: landscape) and (max-height: 500px) {
   .text-marquee-container {
     margin: 8px auto;
-    height: 30px;
-    max-width: 200px;
+    height: 26px;
+    max-width: 80px;
     
     .marquee-text {
-      font-size: 12px;
+      font-size: 11px;
     }
   }
 } 
