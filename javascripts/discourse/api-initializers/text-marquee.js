@@ -50,12 +50,11 @@ export default {
               'discovery.unread'
             ];
             
-            if (homeRoutes.includes(currentRoute)) {
-              lastRouteCheck = now;
-              routeCheckCache = true;
-              lastRoute = currentRoute;
-              return true;
-            }
+            const isHomeRoute = homeRoutes.includes(currentRoute);
+            lastRouteCheck = now;
+            routeCheckCache = isHomeRoute;
+            lastRoute = currentRoute;
+            return isHomeRoute;
           }
           
           const pathname = window.location.pathname;
@@ -69,6 +68,9 @@ export default {
           ];
           
           const isHomePath = homeUrlPatterns.some(pattern => {
+            if (pattern === '/') {
+              return pathname === '/' || pathname === '';
+            }
             return pathname === pattern || pathname.startsWith(pattern + '?');
           });
           
@@ -78,7 +80,7 @@ export default {
           
         } catch (error) {
           const pathname = window.location.pathname;
-          const result = pathname === '/' || pathname === '/latest' || pathname === '/categories';
+          const result = pathname === '/' || pathname === '' || pathname === '/latest' || pathname === '/categories';
           lastRouteCheck = now;
           routeCheckCache = result;
           return result;
