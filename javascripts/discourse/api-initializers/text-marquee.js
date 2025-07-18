@@ -7,68 +7,93 @@ export default {
     withPluginApi("0.8.31", (api) => {
       const themeSettings = api.container.lookup("service:theme-settings");
       
-      console.log("Text Marquee: Initializing...");
-      console.log("Text Marquee: Settings enabled:", themeSettings?.text_marquee_enabled);
-      
       if (themeSettings?.text_marquee_enabled === false) {
-        console.log("Text Marquee: Component disabled in settings");
         return;
       }
       
-      function createMarqueeComponent() {
-        const container = document.createElement('div');
-        container.className = 'text-marquee-container';
-        
-        const marqueeText = themeSettings?.marquee_text || '最新推薦';
-        const marqueeUrl = themeSettings?.marquee_url || 'https://fungps01.com/lists/recommendation';
-        const duration = themeSettings?.marquee_animation_duration || 8;
-        
-        container.setAttribute('aria-label', `点击跳转: ${marqueeText}`);
-        container.style.setProperty('--marquee-duration', `${duration}s`);
-        
-        const content = document.createElement('div');
-        content.className = 'text-marquee-content';
-        
-        const text = document.createElement('span');
-        text.className = 'marquee-text';
-        text.textContent = marqueeText;
-        
-        content.appendChild(text);
-        container.appendChild(content);
-        
-        function handleClick(event) {
-          event.preventDefault();
-          console.log("Text Marquee: Clicked, redirecting to:", marqueeUrl);
-          window.location.href = marqueeUrl;
-        }
-        
-        function handleKeyPress(event) {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            handleClick(event);
-          }
-        }
-        
-        container.addEventListener('click', handleClick);
-        container.addEventListener('keypress', handleKeyPress);
-        
-        console.log("Text Marquee: Component created with text:", marqueeText);
-        return container;
+      let cachedTargetElement = null;
+      let lastRoute = null;
+      let lastRouteCheck = 0;
+      let routeCheckCache = null;
+      const ROUTE_CACHE_DURATION = 100;
+      
+      function getExistingMarquee() {
+        return document.querySelector('.text-marquee-container');
       }
       
-      function insertMarquee() {
-        console.log("Text Marquee: insertMarquee called, readyState:", document.readyState);
+      function removeExistingMarquee() {
+        const existingMarquee = getExistingMarquee();
+        if (existingMarquee) {
+          existingMarquee.remove();
+          return true;
+        }
+        return false;
+      }
+      
+      function isHomePage() {
+        const now = Date.now();
         
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', insertMarquee);
-          return;
+        if (now - lastRouteCheck < ROUTE_CACHE_DURATION && routeCheckCache !== null) {
+          return routeCheckCache;
         }
-
-        if (document.querySelector('.text-marquee-container')) {
-          console.log("Text Marquee: Component already exists, skipping");
-          return;
+        
+        try {
+          const router = api.container.lookup('router:main');
+          if (router && router.currentRouteName) {
+            const currentRoute = router.currentRouteName;
+            
+            const homeRoutes = [
+              'discovery.latest',
+              'discovery.categories', 
+              'discovery.top',
+              'discovery.new',
+              'discovery.unread'
+            ];
+            
+            if (homeRoutes.includes(currentRoute)) {
+              lastRouteCheck = now;
+              routeCheckCache = true;
+              lastRoute = currentRoute;
+              return true;
+            }
+          }
+          
+          const pathname = window.location.pathname;
+          const homeUrlPatterns = [
+            '/',
+            '/latest',
+            '/categories',
+            '/top',
+            '/new',
+            '/unread'
+          ];
+          
+          const isHomePath = homeUrlPatterns.some(pattern => {
+            return pathname === pattern || pathname.startsWith(pattern + '?');
+          });
+          
+          lastRouteCheck = now;
+          routeCheckCache = isHomePath;
+          return isHomePath;
+          
+        } catch (error) {
+          const pathname = window.location.pathname;
+          const result = pathname === '/' || pathname === '/latest' || pathname === '/categories';
+          lastRouteCheck = now;
+          routeCheckCache = result;
+          return result;
         }
-
+      }
+      
+      function findOptimalTargetElement() {
+        try {
+          if (cachedTargetElement && document.contains && document.contains(cachedTargetElement)) {
+            return cachedTargetElement;
+          }
+        } catch (e) {
+          cachedTargetElement = null;
+        }
+        
         const targetSelectors = [
           '.welcome-message',
           '.topic-list-header',
@@ -80,56 +105,189 @@ export default {
           'body'
         ];
         
-        let targetElement = null;
         for (const selector of targetSelectors) {
-          targetElement = document.querySelector(selector);
-          if (targetElement) {
-            console.log("Text Marquee: Found target element:", selector);
-            break;
+          try {
+            const element = document.querySelector(selector);
+            if (element && element.parentNode) {
+              cachedTargetElement = element;
+              return element;
+            }
+          } catch (e) {
+            continue;
           }
         }
         
-        if (targetElement) {
-          const marqueeComponent = createMarqueeComponent();
+        cachedTargetElement = null;
+        return null;
+      }
+      
+      function createMarqueeComponent() {
+        try {
+          const container = document.createElement('div');
+          container.className = 'text-marquee-container';
           
-          const welcomeText = document.querySelector('p');
-          if (welcomeText && welcomeText.textContent.includes('很高兴在这里见到您')) {
-            welcomeText.parentNode.insertBefore(marqueeComponent, welcomeText.nextSibling);
-            console.log("Text Marquee: Component inserted after welcome text");
-          } else {
-            if (targetElement.firstChild) {
-              targetElement.insertBefore(marqueeComponent, targetElement.firstChild);
-            } else {
-              targetElement.appendChild(marqueeComponent);
-            }
-            console.log("Text Marquee: Component inserted into fallback position:", targetElement.tagName);
+          const marqueeText = themeSettings?.marquee_text || '最新推薦';
+          const marqueeUrl = themeSettings?.marquee_url || 'https://fungps01.com/lists/recommendation';
+          const duration = themeSettings?.marquee_animation_duration || 8;
+          
+          if (typeof marqueeText !== 'string' || marqueeText.length === 0) {
+            return null;
           }
-        } else {
-          console.error("Text Marquee: No suitable target element found");
-          console.log("Text Marquee: Available elements:", document.querySelectorAll('*').length);
+          
+          container.setAttribute('aria-label', `点击跳转: ${marqueeText}`);
+          container.style.setProperty('--marquee-duration', `${duration}s`);
+          
+          const content = document.createElement('div');
+          content.className = 'text-marquee-content';
+          
+          const text = document.createElement('span');
+          text.className = 'marquee-text';
+          text.textContent = marqueeText;
+          
+          content.appendChild(text);
+          container.appendChild(content);
+          
+          function handleClick(event) {
+            try {
+              event.preventDefault();
+              if (marqueeUrl && typeof marqueeUrl === 'string') {
+                window.location.href = marqueeUrl;
+              }
+            } catch (e) {
+              // Silently fail if navigation fails
+            }
+          }
+          
+          function handleKeyPress(event) {
+            try {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleClick(event);
+              }
+            } catch (e) {
+            }
+          }
+          
+          try {
+            container.addEventListener('click', handleClick);
+            container.addEventListener('keypress', handleKeyPress);
+          } catch (e) {
+          }
+          
+          return container;
+          
+        } catch (error) {
+          return null;
         }
       }
       
-      api.onPageChange(() => {
-        const existingMarquee = document.querySelector('.text-marquee-container');
-        if (existingMarquee) {
-          existingMarquee.remove();
+      function insertMarquee() {
+        try {
+          if (!isHomePage()) {
+            removeExistingMarquee();
+            cachedTargetElement = null;
+            return;
+          }
+          
+          if (document.readyState === 'loading') {
+            try {
+              document.addEventListener('DOMContentLoaded', insertMarquee);
+            } catch (e) {
+              setTimeout(insertMarquee, 500);
+            }
+            return;
+          }
+
+          if (getExistingMarquee()) {
+            return;
+          }
+
+          const targetElement = findOptimalTargetElement();
+          
+          if (!targetElement) {
+            return;
+          }
+
+          const marqueeComponent = createMarqueeComponent();
+          
+          if (!marqueeComponent) {
+            return;
+          }
+          
+          try {
+            const welcomeText = document.querySelector('p');
+            if (welcomeText && welcomeText.textContent && welcomeText.textContent.includes('很高兴在这里见到您') && welcomeText.parentNode) {
+              welcomeText.parentNode.insertBefore(marqueeComponent, welcomeText.nextSibling);
+            } else {
+              if (targetElement.firstChild) {
+                targetElement.insertBefore(marqueeComponent, targetElement.firstChild);
+              } else {
+                targetElement.appendChild(marqueeComponent);
+              }
+            }
+          } catch (insertError) {
+            try {
+              if (targetElement && targetElement.appendChild) {
+                targetElement.appendChild(marqueeComponent);
+              }
+            } catch (fallbackError) {
+              // Final fallback: append to body if possible
+              try {
+                document.body.appendChild(marqueeComponent);
+              } catch (bodyError) {
+                // If all insertion methods fail, give up silently
+              }
+            }
+          }
+          
+        } catch (error) {
+          clearCache();
         }
-        
-        setTimeout(insertMarquee, 100);
-      });
+      }
       
-      insertMarquee();
+      function clearCache() {
+        cachedTargetElement = null;
+        lastRoute = null;
+        lastRouteCheck = 0;
+        routeCheckCache = null;
+      }
+      
+      function handlePageTransition() {
+        try {
+          removeExistingMarquee();
+          clearCache();
+          
+          if (isHomePage()) {
+            setTimeout(() => {
+              try {
+                insertMarquee();
+              } catch (e) {
+              }
+            }, 100);
+          }
+        } catch (error) {
+          try {
+            clearCache();
+          } catch (e) {
+          }
+        }
+      }
+      
+      try {
+        api.onPageChange(handlePageTransition);
+      } catch (error) {
+      }
+      
+      try {
+        insertMarquee();
+      } catch (error) {
+      }
       
       if (api.onThemeSettingsChange) {
-        api.onThemeSettingsChange(() => {
-          console.log("Text Marquee: Theme settings changed, reloading component");
-          const existingMarquee = document.querySelector('.text-marquee-container');
-          if (existingMarquee) {
-            existingMarquee.remove();
-          }
-          setTimeout(insertMarquee, 100);
-        });
+        try {
+          api.onThemeSettingsChange(handlePageTransition);
+        } catch (error) {
+        }
       }
     });
   }
